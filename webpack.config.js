@@ -2,7 +2,7 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   context: __dirname + '/src',
-  entry: './client/index.js',
+  entry: './index.js',
   output: {
     path: './build',
     publicPath: '',
