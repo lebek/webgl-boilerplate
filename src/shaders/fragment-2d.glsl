@@ -26,22 +26,22 @@ float fbm(vec2 p)
     float f=0.;
     float freq=4.0;
     float amp=1.3;
-    for(int i=0;i<5;++i)
+    for(int i=0;i<8;++i)
     {
         f+=noise(p*freq)*amp;
         amp*=0.5;
         freq*=1.79;
     }
 
-    f+=noise(p*100.0)*0.03;
+    //f+=noise(p*100.0)*0.03;
 
     return f;
 }
 
 float f(vec3 p)
 {
-    float h=fbm(p.xz);
-    h+=smoothstep(-.5,1.5,h);
+    float h=pow(fbm(p.xz), 1.6);
+    h+=smoothstep(0.0,1.0,h);
     h=p.y-h;
     return h;
 }
@@ -156,12 +156,12 @@ void main() {
 
 	vec2 o = render(camOrigin, rd);
 	vec3 col;
-  vec3 lightDir = normalize(vec3(10,3,-6));
+  vec3 lightDir = normalize(vec3(10,4,-6));
 	vec3 pos = camOrigin+rd*o.x;
 	if (o.y > 0.0) {
 		vec3 n = calcNormal(pos);
 		float dif = dot(n, lightDir);
-    float sh = shadow(pos, lightDir, 0.1, 100.0, 5.0);
+    float sh = shadow(pos, lightDir, 0.01, 100.0, 5.0);
 
 		// if(o.y < 1.5) {
 		// 	float f = mod(floor(1.0*pos.z) + floor(1.0*pos.x), 2.0);
