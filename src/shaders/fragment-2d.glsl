@@ -25,12 +25,12 @@ float fbm(vec2 p)
     p*=0.09;
     float f=0.;
     float freq=4.0;
-    float amp=1.3;
-    for(int i=0;i<8;++i)
+    float amp=0.3;
+    for(int i=0;i<3;++i)
     {
         f+=noise(p*freq)*amp;
-        amp*=0.5;
-        freq*=1.79;
+        amp*=1.0;
+        freq*=1.0;
     }
 
     //f+=noise(p*100.0)*0.03;
@@ -42,7 +42,7 @@ float f(vec3 p)
 {
     float h=pow(fbm(p.xz), 1.6);
     h+=smoothstep(0.0,1.0,h);
-    h=p.y-h;
+    h=p.y-min(1.0, h);
     return h;
 }
 
@@ -61,7 +61,7 @@ vec2 map(vec3 p) {
   // vec3 r = vec3(3, 0, 3);
   // vec3 k = mod(p-vec3(0,p.y+0.1,0), r) - 0.5*r;
   // o = opMin(o, vec2(sdSphere(k, 0.2), 3.0));
-	return o;
+	return vec2(f(p), 1.0);
 }
 
 /* TODO: understand */
@@ -87,7 +87,7 @@ mat3 setCamera(vec3 camOrigin, in vec3 lookAt, float camRotation)
 
 vec2 render(vec3 camOrigin, vec3 rd) {
 	float d = 1.0;
-	float maxd = 35.0;
+	float maxd = 95.0;
 	float threshold = 0.001;
 	float mat = -0.1;
 
@@ -126,7 +126,7 @@ vec3 applyFog( in vec3  rgb,      // original color of the pixel
                in vec3  rayDir,   // camera to point vector
                in vec3  sunDir )  // sun light direction
 {
-    float fogAmount = 1.0 - exp( -distance*0.05 );
+    float fogAmount = 1.0 - exp( -distance*distance*0.001 );
     float sunAmount = max( dot( rayDir, sunDir ), 0.0 );
     vec3  fogColor  = mix( vec3(0.5,0.6,0.7), // bluish
                            vec3(1.0,0.9,0.7), // yellowish
@@ -140,8 +140,8 @@ void main() {
 	uv.x *= u_resolution.x/u_resolution.y;
 	vec3 camVel = vec3(2.0, 0, 0);
 	vec3 lookVel = vec3(0, 0, 0);
-	vec3 camOrigin = vec3(0, 5.0, 0)+camVel*u_time;
-	vec3 lookAt = vec3(20, 0, 0)+lookVel*u_time+camVel*u_time;
+	vec3 camOrigin = vec3(0, 8.0, 0)+camVel*u_time;
+	vec3 lookAt = vec3(40, 0, 0)+lookVel*u_time+camVel*u_time;
 
 	// float r = 10.0;
 	// float rate = 0.3;
@@ -152,7 +152,7 @@ void main() {
 	mat3 ca = setCamera(camOrigin, lookAt, 0.0);
 
 	// ray direction
-	vec3 rd = ca * normalize(vec3(uv.xy, 3.0));
+	vec3 rd = ca * normalize(vec3(uv.xy, 2.0));
 
 	vec2 o = render(camOrigin, rd);
 	vec3 col;
@@ -170,11 +170,11 @@ void main() {
 
     //col = vec3(sh);
     //col = vec3(dif)*vec3(1.0, 0.8, 0.6)*sh;
-		col = vec3(dif)*vec3(1.5, 1.0, 0.3)*sh;
+		col = vec3(dif)*sh;
 
     if (o.y <= 1.0) {
-      float x = smoothstep(2.2, 2.7, pos.y);
-      col *= mix(vec3(0.14,0.2,0.12), vec3(0.3,0.3,0.3), x);
+      float x = smoothstep(0.9999, 1.0, pos.y);
+      col *= mix(vec3(0.3, 0.25, 0.3), vec3(0.3, 0.1, 0.1), x);
     } else if (o.y <= 2.0) {
 			col = vec3(sh);
 		} else if (o.y <= 3.0) {
